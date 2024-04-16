@@ -22,8 +22,12 @@ var backWings;
 // Clouds array
 var clouds = [];
 
+// Movement variables
+var keysPressed = {}; // Object to keep track of keys pressed
+
 // Movement for the clouds
 function onFrame(event) {
+    onKeyDown();
     for (var i = 0; i < clouds.length; i++) {
         clouds[i].position.x -= 1; // Move the cloud to the left
         if (clouds[i].position.x < -50) {
@@ -62,7 +66,13 @@ window.onload = function(){
     setInterval(rotateHelix, 30);
 
     // Move of the plane with the keyboard
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keydown', function(event) {
+        keysPressed[event.key] = true; // Set key as pressed
+    });
+
+    document.addEventListener('keyup', function(event) {
+        keysPressed[event.key] = false; // Set key as released
+    });
 }
 
 // Function for create a cloud
@@ -165,22 +175,30 @@ function rotateHelix() {
 
 // WASD controls 
 function onKeyDown(event) {
-    var moveAmount = 10; // Move amount in px
+    var moveAmount = 5; // Move amount in px
     var moveX = 0;
     var moveY = 0;
 
-    if (event.key === 'a' || event.key === 'A' || event.key === 'left') {
+    if (keysPressed['a'] || keysPressed['A'] || keysPressed['left']) {
         moveX -= moveAmount; // Left move
-    } else if (event.key === 'd' || event.key === 'D' || event.key === 'right') {
+    } 
+    if (keysPressed['d'] || keysPressed['D'] || keysPressed['right']) {
         moveX += moveAmount; // Right move
-    } else if (event.key === 'w' || event.key === 'W' || event.key === 'up') {
+    } 
+    if (keysPressed['w'] || keysPressed['W'] || keysPressed['up']) {
         moveY -= moveAmount; // Up move
-    } else if (event.key === 's' || event.key === 'S' || event.key === 'down') {
+    } 
+    if (keysPressed['s'] || keysPressed['S'] || keysPressed['down']) {
         moveY += moveAmount; // Down move
     }
 
     // Move the plane
     plane.position.x += moveX;
     plane.position.y += moveY;
+}
+
+//see popUp
+function popUp() {
+    alert("El avión se mueve con WASD, mero bobo que no sabe ni como mover un avión, definitivamente no le sabes");
 }
 
