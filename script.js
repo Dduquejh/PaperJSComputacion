@@ -24,15 +24,44 @@ var clouds = [];
 
 // Movement variables
 var keysPressed = {}; // Object to keep track of keys pressed
+var moveAmount = 5; // Move amount in px
+    
+
+// Rotation variables
+var rotationAmount = 5; // Roteta amount
+var rotationAngle = 0;  // Flag rotation angle
 
 // Movement for the clouds
 function onFrame(event) {
     onKeyDown();
+    onKeyUp();
     for (var i = 0; i < clouds.length; i++) {
         clouds[i].position.x -= 1; // Move the cloud to the left
         if (clouds[i].position.x < -50) {
             clouds[i].position.x = view.size.width + 50; // If the cloud isn't in the canvas it appears again
         }
+    }
+
+    // Límites del lienzo
+    var canvasWidth = view.size.width;
+    var canvasHeight = view.size.height;
+    var planeWidth = plane.bounds.width;
+    var planeHeight = plane.bounds.height;
+    
+    // Verificar límites horizontales
+    if (plane.position.x < planeWidth / 2) {
+        plane.position.x = planeWidth / 2;
+    }
+    if (plane.position.x > canvasWidth - planeWidth / 2) {
+        plane.position.x = canvasWidth - planeWidth / 2;
+    }
+    
+    // Verificar límites verticales
+    if (plane.position.y < planeHeight / 2) {
+        plane.position.y = planeHeight / 2;
+    }
+    if (plane.position.y > canvasHeight - planeHeight / 2) {
+        plane.position.y = canvasHeight - planeHeight / 2;
     }
 }
 
@@ -56,6 +85,7 @@ window.onload = function(){
     clouds.push(createCloud(1200, 300));
 
     plane = new Group();
+
 
     // Initialize layers
     bgLayer = new Layer();
@@ -86,10 +116,9 @@ function createCloud(x, y) {
 }
 
 function play(){
-    // Clean plane layer and create new plane
     planeLayer.clear();
-
-
+    
+    plane.removeChildren();
     drawPlane();
     rotateHelix();
 }
@@ -175,15 +204,23 @@ function rotateHelix() {
 
 // WASD controls 
 function onKeyDown(event) {
-    var moveAmount = 5; // Move amount in px
     var moveX = 0;
     var moveY = 0;
 
     if (keysPressed['a'] || keysPressed['A'] || keysPressed['left']) {
         moveX -= moveAmount; // Left move
+        if (rotationAngle > -45) { // Limitar rotación hacia la izquierda a -45 grados
+            rotationAngle -= rotationAmount;
+            plane.rotate(-rotationAmount, plane.position); // Rotar en torno al centro del avión
+            console.log(rotationAngle);
+        }
     } 
     if (keysPressed['d'] || keysPressed['D'] || keysPressed['right']) {
         moveX += moveAmount; // Right move
+        if (rotationAngle < 45) { // Limitar rotación hacia la derecha a 45 grados
+            rotationAngle += rotationAmount;
+            plane.rotate(rotationAmount, plane.position); // Rotar en torno al centro del avión
+        }
     } 
     if (keysPressed['w'] || keysPressed['W'] || keysPressed['up']) {
         moveY -= moveAmount; // Up move
@@ -195,6 +232,17 @@ function onKeyDown(event) {
     // Move the plane
     plane.position.x += moveX;
     plane.position.y += moveY;
+}
+
+function onKeyUp(event){
+    if (!(keysPressed['a'] || keysPressed['A'] || keysPressed['left']) && rotationAngle < 0) {
+        rotationAngle = Math.min(rotationAngle + rotationAmount, 0); // Incrementar el ángulo de rotación en sentido antihorario
+        plane.rotate(rotationAmount, plane.position); // Rotar en sentido antihorario
+    } 
+    if (!(keysPressed['d'] || keysPressed['D'] || keysPressed['right']) && rotationAngle > 0) {
+        rotationAngle = Math.max(rotationAngle - rotationAmount, 0); // Decrementar el ángulo de rotación en sentido horario
+        plane.rotate(-rotationAmount, plane.position); // Rotar en sentido horario
+    } 
 }
 
 //see popUp
