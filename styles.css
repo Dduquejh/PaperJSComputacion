@@ -1,13 +1,45 @@
 body{
     margin: 0;
+    padding: 0;
     overflow: hidden;
     background-color: lightskyblue;
 }
 
-#myCanvas{
+.top-section {
+    background-color: blue;
+    padding: 10px;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 50px;
+    z-index: 1; /* Para asegurar que esté por encima del canvas */
+    display: flex; /* Utilizamos flexbox para alinear elementos */
+    justify-content: space-around; /* Alineamos los elementos de manera uniforme */
+    align-items: center; /* Centramos verticalmente los elementos */
+}
+
+#top-section-title{
+    color:aliceblue;
+}
+
+.top-section-button{
+    width: 10%;
+    height: 80%;
+    background-color:  blue;
+    color: aliceblue;
+    border: 2px solid aliceblue;
+}
+
+.top-section-button:hover{
+    color: lightseagreen;
+    border: 2px solid lightseagreen;
+}
+
+#myCanvas{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 50px); /* Restamos el alto de la sección superior al 100% para que el canvas ocupe el espacio restante */
 }
