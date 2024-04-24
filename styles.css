@@ -3,6 +3,7 @@ body{
     padding: 0;
     overflow: hidden;
     background-color: lightskyblue;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .top-section {
@@ -29,11 +30,17 @@ body{
     background-color:  blue;
     color: aliceblue;
     border: 2px solid aliceblue;
+    border-radius: 10px;
 }
 
 .top-section-button:hover{
     color: lightseagreen;
     border: 2px solid lightseagreen;
+}
+
+#points-display{
+    color: whitesmoke;
+    font-size: 24px;
 }
 
 #myCanvas{

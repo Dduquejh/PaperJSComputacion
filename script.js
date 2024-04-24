@@ -31,6 +31,11 @@ var moveAmount = 5; // Move amount in px
 var rotationAmount = 5; // Roteta amount
 var rotationAngle = 0;  // Flag rotation angle
 
+// Points 
+var points = 0;
+var circles = [];
+var circlesFlag = false;
+
 // Movement for the clouds
 function onFrame(event) {
     onKeyDown();
@@ -42,13 +47,28 @@ function onFrame(event) {
         }
     }
 
-    // Límites del lienzo
+    // Circle generation every 5 seconds
+    if (event.count % 200 === 0 && circlesFlag) {
+        generateCircle();
+    }
+
+    // Check for Collisions with Circles
+    for (var j = 0; j < circles.length; j++) {
+        if (plane.intersects(circles[j])) { // Check if the plane intersects with the circle
+            circles[j].remove(); // Remove the circle when intersected by the plane
+            circles.splice(j, 1); // Remove the circle from the circle array
+            points++; // Increase Points
+            updatePointsUI(); // Update the UI with the new points
+        }
+    }
+
+    // Canvas limits
     var canvasWidth = view.size.width;
     var canvasHeight = view.size.height;
     var planeWidth = plane.bounds.width;
     var planeHeight = plane.bounds.height;
     
-    // Verificar límites horizontales
+    // Check Horizontal limits
     if (plane.position.x < planeWidth / 2) {
         plane.position.x = planeWidth / 2;
     }
@@ -56,7 +76,7 @@ function onFrame(event) {
         plane.position.x = canvasWidth - planeWidth / 2;
     }
     
-    // Verificar límites verticales
+    // Check vertical limits
     if (plane.position.y < planeHeight / 2) {
         plane.position.y = planeHeight / 2;
     }
@@ -69,20 +89,8 @@ window.onload = function(){
     // Initialize Paper.js on the canvas element
     paper.setup('myCanvas');
 
-
     // Create clouds
-    clouds.push(createCloud(100, 100));
-    clouds.push(createCloud(300, 200));
-    clouds.push(createCloud(500, 150));
-    clouds.push(createCloud(700, 250));
-    clouds.push(createCloud(900, 180));
-    clouds.push(createCloud(1100, 120));
-    clouds.push(createCloud(200, 300));
-    clouds.push(createCloud(400, 100));
-    clouds.push(createCloud(600, 250));
-    clouds.push(createCloud(800, 200));
-    clouds.push(createCloud(1000, 150));
-    clouds.push(createCloud(1200, 300));
+    createClouds();
 
     plane = new Group();
 
@@ -105,6 +113,20 @@ window.onload = function(){
     });
 }
 
+// Function to create clouds
+function createClouds() {
+    var cloudPositions = [
+        [100, 100], [300, 200], [500, 150], [700, 250], [900, 180], [1100, 600],
+        [200, 700], [400, 750], [600, 650], [800, 500], [1000, 450], [1200, 350],
+        [1300, 700], [1400, 750], [1600, 650], [1800, 500], [1600, 300], [1400, 200]
+    ];
+
+    for (var i = 0; i < cloudPositions.length; i++) {
+        var position = cloudPositions[i];
+        clouds.push(createCloud(position[0], position[1]));
+    }
+}
+
 // Function for create a cloud
 function createCloud(x, y) {
     var cloud = new Group;
@@ -116,8 +138,11 @@ function createCloud(x, y) {
 }
 
 function play(){
+    points = 0;
+    updatePointsUI();
+    circlesFlag = true;
+
     planeLayer.clear();
-    
     plane.removeChildren();
     drawPlane();
     rotateHelix();
@@ -209,17 +234,17 @@ function onKeyDown(event) {
 
     if (keysPressed['a'] || keysPressed['A'] || keysPressed['left']) {
         moveX -= moveAmount; // Left move
-        if (rotationAngle > -45) { // Limitar rotación hacia la izquierda a -45 grados
+        if (rotationAngle > -45) { // Limit left rotation to -45 degrees
             rotationAngle -= rotationAmount;
-            plane.rotate(-rotationAmount, plane.position); // Rotar en torno al centro del avión
+            plane.rotate(-rotationAmount, plane.position); // Rotate around the center of the plane
             console.log(rotationAngle);
         }
     } 
     if (keysPressed['d'] || keysPressed['D'] || keysPressed['right']) {
         moveX += moveAmount; // Right move
-        if (rotationAngle < 45) { // Limitar rotación hacia la derecha a 45 grados
+        if (rotationAngle < 45) { // Limit left rotation to 45 degrees
             rotationAngle += rotationAmount;
-            plane.rotate(rotationAmount, plane.position); // Rotar en torno al centro del avión
+            plane.rotate(rotationAmount, plane.position); // Rotate around the center of the plane
         }
     } 
     if (keysPressed['w'] || keysPressed['W'] || keysPressed['up']) {
@@ -236,17 +261,57 @@ function onKeyDown(event) {
 
 function onKeyUp(event){
     if (!(keysPressed['a'] || keysPressed['A'] || keysPressed['left']) && rotationAngle < 0) {
-        rotationAngle = Math.min(rotationAngle + rotationAmount, 0); // Incrementar el ángulo de rotación en sentido antihorario
-        plane.rotate(rotationAmount, plane.position); // Rotar en sentido antihorario
+        rotationAngle = Math.min(rotationAngle + rotationAmount, 0); // Increase the angle of rotation counterclockwise
+        plane.rotate(rotationAmount, plane.position); // Rotate counterclockwise
     } 
     if (!(keysPressed['d'] || keysPressed['D'] || keysPressed['right']) && rotationAngle > 0) {
-        rotationAngle = Math.max(rotationAngle - rotationAmount, 0); // Decrementar el ángulo de rotación en sentido horario
-        plane.rotate(-rotationAmount, plane.position); // Rotar en sentido horario
+        rotationAngle = Math.max(rotationAngle - rotationAmount, 0); // Decrease the clockwise rotation angle
+        plane.rotate(-rotationAmount, plane.position); // Rotate clockwise
     } 
 }
 
 //see popUp
 function popUp() {
-    alert("El avión se mueve con WASD, mero bobo que no sabe ni como mover un avión, definitivamente no le sabes");
+    alert("El juego consiste en tocar con el avión los puntos amarillos que van apareciendo y desaparenciendo en pantalla. Para mover el avión usa WASD. La dificulta es para niño de menos de 3 años, no tienes como perder");
 }
+
+// Function to update points UI
+function updatePointsUI() {
+    var pointsDisplay = document.getElementById('points-display');
+    if (pointsDisplay) {
+        pointsDisplay.textContent = "Puntos: " + points;
+    }
+}
+
+// Circle generation function
+function generateCircle() {
+    // Generate a random number between 1 and 3 to determine the number of circles to generate
+    var circleCount = Math.floor(Math.random() * 3) + 1;
+
+    var circlesToRemove = []; // Array to store the circles to be deleted
+
+    for (var i = 0; i < circleCount; i++) {
+        // Generate random coordinates within canvas measurements
+        var x = Math.random() * (view.size.width - 40) + 20; // Subtract 40 to prevent circles from being partially generated outside the canvas
+        var y = Math.random() * (view.size.height - 40) + 20; 
+        
+        var circle = new Path.Circle(new Point(x, y), 20);
+        circle.fillColor = 'yellow'; 
+        circles.push(circle); // Adding the Circle to the Circle Array
+        circlesToRemove.push(circle); // Add the circle to the array of circles to be deleted
+    }
+
+    // Schedule all circles to be deleted after 5 seconds
+    setTimeout(function() {
+        for (var j = 0; j < circlesToRemove.length; j++) {
+            circlesToRemove[j].remove(); // Delete the circle
+            var index = circles.indexOf(circlesToRemove[j]);
+            if (index !== -1) {
+                circles.splice(index, 1); // Remove the circle from the circle array
+            }
+        }
+    }, 2000);
+}
+
+
 
